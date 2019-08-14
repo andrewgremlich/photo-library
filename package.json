@@ -1,0 +1,21 @@
+{
+    "name": "photo-library",
+    "version": "0.1.0",
+    "description": "Sort photos automatically for the user!",
+    "main": "index.js",
+    "scripts": {
+        "start": "node --experimental-modules index.js photos"
+    },
+    "type": "module",
+    "author": "Andrew Gremlich",
+    "license": "MIT",
+    "devDependencies": {},
+    "engines": {
+        "node": "12"
+    },
+    "dependencies": {
+        "exif": "^0.6.0",
+        "mkdirp": "^0.5.1",
+        "mv": "^2.1.1"
+    }
+}
