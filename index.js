@@ -1,4 +1,4 @@
-import { readDirAsync, renameAsync } from './promisified/index.js';
+import { readDirAsync, renameAsync, statAsync } from './promisified/index.js';
 
 import ExifImage from 'exif';
 import mkdirp from 'mkdirp';
@@ -8,6 +8,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const { PHOTO_DIR } = process.env;
+
+const photo_white_list = ["jpeg", "jpg", "JPEG", "JPG"];
 
 const moveImage = async (file, dest) => {
     await renameAsync(file, dest, err => {
@@ -34,21 +36,24 @@ const mkDirs = correctDate => {
 const main = (async () => {
     const dirContents = await readDirAsync(PHOTO_DIR);
 
-    dirContents.forEach(path => {
+    dirContents.forEach(async path => {
         const imageToRead = `${PHOTO_DIR}${path}`;
+        const statPath = await statAsync(imageToRead);
 
-        try {
-            new ExifImage({ image: imageToRead }, async (err, data) => {
-                if (err) console.log(err);
-                else {
-                    const correctDate = data.exif.DateTimeOriginal.slice(0, 10).split(':');
-                    const dirForPhotos = await mkDirs(correctDate);
+        if (photo_white_list.filter(pathr => path.includes(pathr)) && !statPath.isDirectory()) {
+            try {
+                new ExifImage({ image: imageToRead }, async (err, data) => {
+                    if (err) console.log(err);
+                    else {
+                        const correctDate = data.exif.DateTimeOriginal.slice(0, 10).split(':');
+                        const dirForPhotos = await mkDirs(correctDate);
 
-                    await moveImage(imageToRead, `${dirForPhotos}/${path}`);
-                }
-            });
-        } catch (err) {
-            console.log(err);
+                        await moveImage(imageToRead, `${dirForPhotos}/${path}`);
+                    }
+                });
+            } catch (err) {
+                console.log(err);
+            }
         }
     });
 })();
