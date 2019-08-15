@@ -1,59 +1,18 @@
-import { readDirAsync, renameAsync, statAsync } from './promisified/index.js';
+import path from 'path';
+import { statAsync } from './promisified/index.js';
+import { readPhotosDir } from './app/index.js';
 
-import ExifImage from 'exif';
-import mkdirp from 'mkdirp';
-
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const { PHOTO_DIR } = process.env;
-
-const photo_white_list = ["jpeg", "jpg", "JPEG", "JPG"];
-
-const moveImage = async (file, dest) => {
-    await renameAsync(file, dest, err => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-    });
-};
-
-const mkDirs = correctDate => {
-    const yearDir = `${PHOTO_DIR}${correctDate[0]}`;
-    const monthDir = `${yearDir}/${correctDate[1]}`;
-    const dayDir = `${monthDir}/${correctDate[2]}`;
-
-    return new Promise((resolve, reject) => {
-        mkdirp(dayDir, err => {
-            if (err) console.log(err);
-            resolve(dayDir);
-        });
-    });
-};
+const [node, file, photosDirOpt] = process.argv;
+const dirname = path.resolve();
 
 const main = (async () => {
-    const dirContents = await readDirAsync(PHOTO_DIR);
+    const photosDirPath = `${dirname}/${photosDirOpt}`;
+    const statPath = await statAsync(photosDirPath);
+    const isInputDir = statPath.isDirectory();
 
-    dirContents.forEach(async path => {
-        const imageToRead = `${PHOTO_DIR}${path}`;
-        const statPath = await statAsync(imageToRead);
-
-        if (photo_white_list.filter(pathr => path.includes(pathr)) && !statPath.isDirectory()) {
-            try {
-                new ExifImage({ image: imageToRead }, async (err, data) => {
-                    if (err) console.log(err);
-                    else {
-                        const correctDate = data.exif.DateTimeOriginal.slice(0, 10).split(':');
-                        const dirForPhotos = await mkDirs(correctDate);
-
-                        await moveImage(imageToRead, `${dirForPhotos}/${path}`);
-                    }
-                });
-            } catch (err) {
-                console.log(err);
-            }
-        }
-    });
+    if (isInputDir) {
+        readPhotosDir(photosDirPath);
+    } else {
+        console.log(`${photosDirPath} is not a directory!`)
+    }
 })();
