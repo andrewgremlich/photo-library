@@ -1,24 +1,37 @@
 {
     "name": "photo-library",
-    "version": "0.2.0",
+    "productName": "Photo Library",
+    "version": "1.0.0",
     "description": "Sort photos automatically for the user!",
     "main": "index.js",
-    "bin": {
-        "photoslib": "./index.js"
-    },
     "scripts": {
-        "start": "node --experimental-modules index.js photos/",
-        "myPics": "node --experimental-modules index.js OnePlusPictures/"
+        "start": "electron .",
+        "debug": "electron . --debug",
+        "pack": "electron-builder --dir",
+        "dist": "electron-builder"
+    },
+    "build": {
+        "appId": "com.photolibrary.app",
+        "mac": {
+            "category": "public.app-category.photography"
+        }
     },
     "type": "module",
     "author": "Andrew Gremlich",
     "license": "MIT",
-    "devDependencies": {},
     "engines": {
         "node": "12"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/andrewgremlich/photo-library.git"
     },
     "dependencies": {
         "exif": "^0.6.0",
         "mkdirp": "^0.5.1"
+    },
+    "devDependencies": {
+        "electron": "^6.0.3",
+        "electron-builder": "^21.2.0"
     }
 }

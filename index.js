@@ -1,18 +1,32 @@
-import path from 'path';
-import { statAsync } from './promisified/index.js';
-import { readPhotosDir } from './app/index.js';
+const { app, BrowserWindow, dialog } = require('electron');
 
-const [node, file, photosDirOpt] = process.argv;
-const dirname = path.resolve();
+const debug = /--debug/.test(process.argv[2]);
 
-const main = (async () => {
-    const photosDirPath = `${dirname}/${photosDirOpt}`;
-    const statPath = await statAsync(photosDirPath);
-    const isInputDir = statPath.isDirectory();
+let mainWindow;
 
-    if (isInputDir) {
-        readPhotosDir(photosDirPath);
-    } else {
-        console.log(`${photosDirPath} is not a directory!`)
+const createWindow = () => {
+    mainWindow = new BrowserWindow({
+        width: 1200,
+        height: 900,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+
+    if (debug) {
+        mainWindow.webContents.openDevTools();
+        // mainWindow.maximize();
     }
-})();
+
+    mainWindow.loadFile('./app/index.html');
+
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
+};
+
+app.on('ready', createWindow);
+
+app.on('window-all-closed', () => process.platform !== 'darwin' && app.quit());
+
+app.on('activate', () => mainWindow === null && createWindow());

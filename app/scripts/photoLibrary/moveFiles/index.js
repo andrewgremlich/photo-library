@@ -1,7 +1,7 @@
 import ExifImage from 'exif';
 import mkdirp from 'mkdirp';
 
-import { readDirAsync, renameAsync, statAsync } from '../promisified/index.js';
+import { readDirAsync, renameAsync, statAsync } from '../../promisified/index.js';
 
 const moveImage = async (file, dest) => {
     await renameAsync(file, dest, err => {
